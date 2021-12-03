@@ -13,7 +13,7 @@ regleMsg = f':heart: :orange_heart: :yellow_heart: :green_heart: :blue_heart: :p
            f':heart: :orange_heart: :yellow_heart: :green_heart: :blue_heart: :purple_heart:  :blue_heart: :green_heart: :yellow_heart:  :orange_heart: :heart: '
 
 BienvenuMsg = f'Sal s jeune Boston des thuisses dans cette incroyable serveur\n' \
-              f' Te voici dans ton salon privé ou tu pourras réaliser tout tes filouteries \n' \
+              f' Te voici dans ton salon privé ou tu pourras réaliser toutes tes filouteries \n' \
               f' le but est simple se faire un max de Moulaga a la cote de la finance \n' \
               f'tu pars avec 1000 euros a toi de faire les bons investissments \n ' \
               f'les actions accessible pour le moment sont les entreprises du CAC40 '
@@ -30,13 +30,25 @@ def MessCompt(liste):
     return (Mess)
 
 
-def gestionListe(liste, index):
-    options = [create_select_option('Retour', value=str(1))]
+def gestionListe(liste,Nom, index):
+    options = [create_select_option('Retour', value=str(0))]
     for i in range(index, min(index+24, len(liste[index:]))):
-        options += [create_select_option(str(liste[i-1]), value=str(i+1))]
+        options += [create_select_option(str(Nom[i-1]), value=str(i+1))]
     if len(liste[index:]) > 24:
         options[-1] = create_select_option("autre ...", value=str(25))
         fini=False
     else:
         fini =True
     return (options,fini)
+
+def gestionVente(Nom,indice,liste):
+    options = [create_select_option('Retour', value=str(0))]
+
+    for i in range(indice, min(indice+24, len(liste[indice:]))):
+        options += [create_select_option(str(Nom[i]), value=str(i+1))]
+    if len(liste[indice:]) > 24:
+        options[-1] = create_select_option("autre ...", value=str(25))
+        fini=False
+    else:
+        fini =True
+    return(options,fini)
