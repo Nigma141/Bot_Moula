@@ -20,7 +20,7 @@ txt.close()
 pth = 'BaseDiscord.db'
 
 
-intents=intents=discord.Intents.all()
+intents=discord.Intents.all()
 
 client = commands.Bot(command_prefix=",",intents=intents, description="LeBostonMoulatise")
 slash = SlashCommand(client, sync_commands=True)
@@ -32,8 +32,6 @@ async def on_ready():
     while not client.is_closed():
         await asyncio.sleep(180)
         Moula.Actu(Moula.listeCac, pth)
-
-
 
 @client.event
 async def on_member_join(member):
@@ -48,17 +46,14 @@ async def on_member_join(member):
     await client.get_channel(IDChannel1.id).send(messages.BienvenuMsg)
     db.AjoutJouer(member.id, pth)
 
-
 @client.command(aliases=['rgl'])
 async def regle(message):
     await message.channel.purge(limit=1)
     await message.send(messages.regleMsg)
 
-
 @client.command(aliases=['clc'])
 async def clear(message, *, amount=1):
     await message.channel.purge(limit=amount + 1)
-
 
 @client.command(aliases=['arr'])
 async def arrivee(message):
@@ -73,11 +68,9 @@ async def arrivee(message):
     await client.get_channel(IDChannel1.id).send(messages.BienvenuMsg)
     db.AjoutJouer(member.id, pth)
 
-
 @client.command()
 async def status(ctx):
     print(client.get_channel(904825070382366741).overwrites)
-
 
 @client.command()
 async def init(ctx):
@@ -86,14 +79,8 @@ async def init(ctx):
     await client.get_channel(904401747013955688).send(file=discord.File('baniere.png'))
 
     # mettre message initialisation
-
     db.CreateBase(pth)
-    Moula.init(Moula.listeCac, pth)
-
-    # supprimer message d init
-
-    # mettre les messages  des regles
-
+    Moula.init(Moula.ListeActif,Moula.NomActif, pth)
 
 @client.command(aliases=["st"])
 async def info(ctx):
@@ -101,38 +88,57 @@ async def info(ctx):
     Liste = db.StatusJoueur(pth, ctx.author.id)
     await client.get_channel(ctx.channel.id).send(messages.MessCompt(Liste))
 
-
 @client.command(aliases=["f5"])
 async def actu(msg):
     Moula.Actu(Moula.listeCac, pth)
 
-
-
-
-
 @client.command()
-async def acheter(ctx, index=1):
-    options, fini = messages.gestionListe(Moula.listeCac, Moula.NomCac, index)
-    select = create_select(options, placeholder="choisi dans la liste", min_values=1, max_values=1)
-    achat = await ctx.send("quelle achat veux tu faire ?", components=[create_actionrow(select)])
+async def acheter(ctx, index=0,index2=0):
+    liste,fini=messages.gestionListe(Moula.ListeListeActif, Moula.NomListeListe,index)
+    await ctx.send(liste)
+    selection = create_select(liste, placeholder="choisi dans la liste", min_values=1, max_values=1)
 
-    def check(m):
-        return m.author_id == ctx.author.id and m.origin_message.id == achat.id
+    Choix = await ctx.send("Dans quelle liste veux tu choisir ?", components=[create_actionrow(selection)])
+    def check2(m):
+        return m.author_id == ctx.author.id and m.origin_message.id == Choix.id
 
-    achat_ctx = await wait_for_component(client, components=select, check=check)
+    choix_ctx = await wait_for_component(client, components=selection, check=check2)
 
-    if achat_ctx.values[0] == str(index + 24):
-        await acheter(ctx, index + 24)
-    elif achat_ctx.values[0] == "1":
+
+    if choix_ctx.values[0] == "0":
         await ctx.channel.purge(limit=2)
-        await achat_ctx.send("Dommage jeune bougre")
+        await choix_ctx.send("Dommage jeune bougre")
     else:
+        await ctx.send(choix_ctx.values[0])
+        await ctx.send(Moula.ListeListeActif[int(choix_ctx.values[0])-1][0])
+        options, fini = messages.gestionListe(Moula.ListeListeActif[int(choix_ctx.values[0])-1], Moula.NomListeListe[int(choix_ctx.values[0])-1], index2)
+        print("voici les options")
+        print(options)
+        select = create_select(options, placeholder="choisi dans la liste", min_values=1, max_values=1)
+        achat = await ctx.send("quelle achat veux tu faire ?", components=[create_actionrow(select)])
 
-        message = db.AcheterAction(pth, ctx.author.id, Moula.listeCac[int(achat_ctx.values[0]) - 2], 1)
-        await ctx.channel.purge(limit=2)
+        def check(m):
+            return m.author_id == ctx.author.id and m.origin_message.id == achat.id
 
-        await achat_ctx.send(message)
+        achat_ctx = await wait_for_component(client, components=select, check=check)
 
+        if achat_ctx.values[0] == str(index2 + 24):
+            await acheter(ctx, index, index2 + 24)
+        elif achat_ctx.values[0] == "0":
+            await ctx.channel.purge(limit=2)
+            await achat_ctx.send("Dommage jeune bougre")
+        else:
+            ctx.send("Combien veux tu en acheter ?")
+            def check3(msg):
+                return( msg.author== ctx.author and msg.channel == ctx.channel)
+            msg = await  client.wait_for("message",check=check3, timeout=30)
+
+            print(msg)
+            VolumeDemande=float(msg)
+            message = db.AcheterAction(pth, ctx.author.id, Moula.listeCac[int(achat_ctx.values[0]) - 2], 1)
+            await ctx.channel.purge(limit=2)
+
+            await achat_ctx.send(message)
 
 @client.command()
 async def vendre(Vente_ctx, indice=0):
@@ -141,8 +147,8 @@ async def vendre(Vente_ctx, indice=0):
     if len(Portefeuille) != 0:
         print(Portefeuille)
 
-        NomAction = [Moula.NomCac[Moula.listeCac.index(elm[1])] for elm in Portefeuille]  # Moula.NomCac.index(elm)
-        print(NomAction)
+        NomAction = [Moula.NomCac[Moula.listeCac.index(elm[1])] for elm in Portefeuille]
+        print(NomAction.values)
 
         options, fini = messages.gestionVente(NomAction, indice, NomAction)
         select = create_select(options, placeholder="choisi dans la liste", min_values=1, max_values=1)
@@ -167,10 +173,12 @@ async def vendre(Vente_ctx, indice=0):
         await Vente_ctx.send("T'es pauvre t'as pas d'action")
     await Vente_ctx.send(str(Portefeuille))
 
-
 @client.command()
 async def quit(ctx):
     await client.logout()
 
+@client.command()
+async def cours():
+    pass
 
 client.run(token)

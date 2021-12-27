@@ -20,7 +20,6 @@ BienvenuMsg = f'Sal s jeune Boston des thuisses dans cette incroyable serveur\n'
 
 BienvenuMsgAll = f'Nous accueillons aujourd hui un,une ou non binaire jeune boston \n'
 
-
 def MessCompt(liste):
     print(liste)
     Mess = f'\n   <:lingots:904461381041016882>     Tu possède actuellement  : \n' \
@@ -29,11 +28,11 @@ def MessCompt(liste):
         liste[1]) + f'** €'
     return (Mess)
 
-
 def gestionListe(liste,Nom, index):
     options = [create_select_option('Retour', value=str(0))]
+    print(liste[index:])
     for i in range(index, min(index+24, len(liste[index:]))):
-        options += [create_select_option(str(Nom[i-1]), value=str(i+1))]
+        options += [create_select_option(str(Nom[i]), value=str(i+1))]
     if len(liste[index:]) > 24:
         options[-1] = create_select_option("autre ...", value=str(25))
         fini=False

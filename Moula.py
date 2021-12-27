@@ -2,13 +2,25 @@ import datetime
 import yfinance as yf
 import db
 
-#listeCac=["VIE.PA","SGO.PA","ORA.PA","DG.PA","ATO.PA","AIR.PA","OR.PA","ML.PA","HO.PA","CA.PA","AI.PA","ENGI.PA","EN.PA","AC.PA","MC.PA"]
+
+## definition des liste d' actif
 listeCac=["VIE.PA","SGO.PA","SU.PA","ORA.PA","DG.PA","ATO.PA","AIR.PA","OR.PA","ML.PA","HO.PA","CA.PA","AI.PA","ENGI.PA","EN.PA","AC.PA","MC.PA","KER.PA","BN.PA","CAP.PA","VIV.PA","SAN.PA","LR.PA","ACA.PA","BNP.PA","RI.PA","WLN.PA","GLE.PA","SW.PA"]
 NomCac=['VEOLIA ENVIRON.', 'SAINT GOBAIN', 'SCHNEIDER ELECTRIC SE', 'ORANGE', 'VINCI', 'ATOS', 'AIRBUS SE', "L'OREAL", 'MICHELIN', 'THALES', 'CARREFOUR', 'AIR LIQUIDE', 'ENGIE', 'BOUYGUES', 'ACCOR', 'LVMH', 'KERING', 'DANONE', 'CAPGEMINI', 'VIVENDI SE', 'SANOFI', 'LEGRAND', 'CREDIT AGRICOLE', 'BNP PARIBAS ACT.A', 'PERNOD RICARD', 'WORLDLINE', 'SOCIETE GENERALE', 'SODEXO']
+Devise=["EURUSD=X"]
+NomDevise=["EUR/USD"]
 listeDowJ=[]
-Cripto=[]
+NomDowJ=[]
+listeCripto=["BTC-EUR","ETH-EUR",'BNB-EUR',"SOL1-EUR","USDT-EUR"]
+NomCripto=["Bitcoin","Ethereum","Solana","Tether"]
 
-def init(liste,pth):
+ListeActif=listeCac+Devise+listeCripto
+NomActif=NomCac+NomDevise+NomCripto
+
+ListeListeActif=[[listeCac],[Devise],[listeCripto]]
+NomListeListe=["Cac-40","Devise","Cripto"]
+
+
+def init(liste,nom,pth):
     data = yf.download(
         tickers=liste,
         period='5d',
@@ -18,11 +30,11 @@ def init(liste,pth):
     Label = data.Close.columns
     print(Valeur, Label)
     name=[]
+
     for idx in Label:
-        name+=[NomCac[listeCac.index(idx)]]
-    #    print(idx)
-    #    req = yf.Ticker(idx)
-    #    name += [req.info['shortName']]
+        print(idx)
+        req = yf.Ticker(idx)
+        name += [req.info['shortName']]
 
     now = datetime.datetime.now()
     date=now.strftime("%d/%m/%Y %H:%M:%S")
@@ -58,9 +70,4 @@ def Actu(liste,pth):
     date = now.strftime("%d/%m/%Y %H:%M:%S")
     db.Actualisation(pth,Label,Valeur,date)
     return ()
-
-
-def Historique(action,temps):
-    # creer le graphe en fonction de l action et du temps
-    return()
 

@@ -8,7 +8,7 @@ def CreateBase(pth):
 
     cur.execute('create TABLE action (idYahoo text,nomAction text,PrixAct real,dateAction smalldatetime)')
 
-    cur.execute('create TABLE portefeuille (idportefeuille INTEGER PRIMARY KEY AUTOINCREMENT,idJoueur integer,Montantptf real,IDAction integer,VolumeAction integer)')
+    cur.execute('create TABLE portefeuille (idportefeuille INTEGER PRIMARY KEY AUTOINCREMENT,idJoueur integer,Montantptf real,IDAction integer,VolumeAction float)')
 
     cur.execute('create TABLE liveAction (idLive INTEGER PRIMARY KEY AUTOINCREMENT,idAction text,valeur real,ouverture real,date smalldatetime)')
 
@@ -84,7 +84,7 @@ def Actualisation(pth,Label,Valeur,date):
         cur.execute("select Montantptf,VolumeAction from portefeuille where idJoueur=:ID", {"ID":id})
         listeptf=cur.fetchall()
         montantPTF= sum([listeptf[i][0]*listeptf[i][1] for i in range(len(listeptf))])
-        cur.execute("UPDATE joueur set Montantptf=:NVal WHERE IdJ=:lab", {"NVal": NouVal, "lab": Label[i]})
+        cur.execute("UPDATE joueur set MontantPtfTot=:NVal WHERE IdJoueur=:lab", {"NVal": montantPTF, "lab": Label[i]})
 
     con.commit()
     con.close()
@@ -95,8 +95,6 @@ def tableauScore():
     # retourne les gain des joueurs
     # retourne le compte+portefeuille
     return()
-
-
 
 def ReturnPtf(pth,id_joueur):
     con = sqlite3.connect(pth)
@@ -146,7 +144,6 @@ def AcheterAction(pth,Id_joueur,Id_Action,Volume):
         con.commit()
         con.close()
         return('L operation a bien été réalisée')
-
 
 def VenteAction(pth,Id_joueur,Id_Action,Volume):
     con = sqlite3.connect(pth)
